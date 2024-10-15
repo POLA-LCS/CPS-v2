@@ -17,9 +17,10 @@ The line: `macro + 'echo Hello' 'echo Goodbye'`
 executes `macro + 'echo Hello'` and `cps macro + 'echo Goodbye'`.
 
 - **Disable output messages**:  
-Each time you type a instruction there's an output message  
-Output message of `macro = 'del C:\Windows\system32'`: `[CPS] Created: macro`  
-Starting the line with "." makes the output messages to disable in for that instruction.
+Each time you type a instruction there's an output message. Output message of:  
+`macro = 'del C:\Windows\system32'` is `[CPS] Created: macro`  
+Starting the line with "." makes the output messages to disable for that instruction.  
+`. macro = 'echo The output message must not display'
 
 - **Console interpreter**:  
 The CPS v2.0 have a console interpreter, so you can test CPS instructions without modifying your main configuration.
