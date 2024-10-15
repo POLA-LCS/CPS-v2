@@ -60,14 +60,14 @@ def main(argv: list[str], argc: int, printable = True):
     
     # Display HELP
     elif [COMM] == tokens:
-        oper = tokens[0].value
-        if oper in [HELP_FULL, HELP_INIT]:
+        comm = tokens[0].value
+        if comm in [HELP_FULL, HELP_INIT]:
             display_help()
-        elif oper in [INFO_FULL, INFO_INIT]:
+        elif comm in [INFO_FULL, INFO_INIT]:
             for Mac in macros:
                 display_macro_info(Mac)
                 print()
-        elif oper in [VERSION_FULL, VERSION_INIT]:
+        elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
                 
     # CALL

@@ -69,7 +69,7 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
         arg = argv[i]
         if arg in COMMANDS:
             tokens.append(Token(COMM, arg))
-        if arg in MODIFIERS:
+        elif arg in MODIFIERS:
             tokens.append(Token(MOD, arg))
         elif arg in OPERATORS:
             tokens.append(Token(OPER, arg))
