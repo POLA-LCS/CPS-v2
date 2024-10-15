@@ -8,38 +8,38 @@ from scripts import *
 # INDENT = 4
 # Run:
 #     <nothing>     Run default macro with default arguments
-#     M             Run M with default arguments
-#     M % <p...>    Run M with arguments <p>
+#     Mac             Run Mac with default arguments
+#     Mac % <p...>    Run Mac with arguments <p>
 # Arguments:
-#     M %% A P       Set macro M argument A prompt to P
-#     M %% A .       Deletes argument A from M
+#     Mac %% A P       Set macro Mac argument A prompt to P
+#     Mac %% A .       Deletes argument A from Mac
 
 def display_help():
     print("""[USAGE]
           
 Nomenclature:
-    M = Macro name
-    N = Integer
-    S = String
+    Mac = Macro name
+    Str = String
 
 Info:
     --help      Display this message
     --info      Display the macros info
-    M --info    Display the macro M info
+    --version   Display the version 
+    Mac --info    Display the macro Mac info
     
 Set:
-    M = S    Create M with the line S
-    M + S    Append S to M
-    M - S    Prepend S to M
-    M = M2    Override the M code with the M2 code
-    M + M2    Extend M2 code into M code
-    M - M2    Prextend M2 code into M code (not reverse)
-    M # M2    Swap M with M2
+    Mac = Str    Create Mac with the line Str
+    Mac + Str    Append Str to Mac
+    Mac - Str    Prepend Str to Mac
+    Mac = Mac2    Override the Mac code with the Mac2 code
+    Mac + Mac2    Extend Mac2 code into Mac code
+    Mac - Mac2    Prextend Mac2 code into Mac code (not reverse)
+    Mac # Mac2    Swap Mac with Mac2
 
 Delete:
-    M = .    Delete M
-    M + .    Delete M last line
-    M - .    Delete M first line
+    Mac = .    Delete Mac
+    Mac + .    Delete Mac last line
+    Mac - .    Delete Mac first line
 """)
 
 def cps(message: str, printable: bool):
@@ -59,14 +59,16 @@ def main(argv: list[str], argc: int, printable = True):
         run_macro(macros['0'])
     
     # Display HELP
-    elif [OPER] == tokens:
+    elif [COMM] == tokens:
         oper = tokens[0].value
         if oper in [HELP_FULL, HELP_INIT]:
             display_help()
         elif oper in [INFO_FULL, INFO_INIT]:
-            for mac in macros:
-                display_macro_info(mac)
+            for Mac in macros:
+                display_macro_info(Mac)
                 print()
+        elif oper in [VERSION_FULL, VERSION_INIT]:
+            cps(f'Version 2024: {VERSION}')
                 
     # CALL
     elif [NAME] == tokens:
@@ -127,28 +129,28 @@ def main(argv: list[str], argc: int, printable = True):
     elif [NAME, OPER, MOD] == tokens:
         name, oper, mod = extract_values(tokens)
         if oper == SET:
-            if mod == NUL:
+            if mod == NULL:
                 check_macro(name)
                 macros.pop(name)
                 cps(f'Deleted: {name}', printable)
         elif oper == APP:
-            if mod == NUL:
+            if mod == NULL:
                 check_macro(name)
                 check_macro_len(name)
                 cps(f'Pop last {name}: {macros[name].pop()}', printable)
         elif oper == PRE:
-            if mod == NUL:
+            if mod == NULL:
                 check_macro(name)
                 check_macro_len(name)
                 cps(f'Pop first {name}: {macros[name].pop(0)}', printable)
                 
-    # No print
+    # No output message
     elif partial_match([MOD], tokens):
         mod, rest = partial_split(1, tokens)
-        if mod[0] == NUL:
+        if mod[0] == NULL:
             main(argv[1:], argc - 1, False)
 
-    # MULTIPLE LINES CREATE, APPEND, PREPPEND
+    # Multi-line execute
     elif partial_match([NAME, OPER], tokens):
         match_value, rest = partial_split(2, tokens)
         name, oper = match_value
@@ -159,21 +161,21 @@ from sys import argv
 if __name__ == '__main__':
     args = argv[1:]
     argc = len(args)
+    
     if argc == 0:
         print('CPS v2.0 2024')
         print('| Type "--help" to get the help message.')
         print('| "exit" to closes the interpreter.')
+    
         while (line := input('\n>>> ')) != 'exit':
             try:
                 main(chunks := line.split(' '), len(chunks))
             except AssertionError as ass:
                 print('[ERROR]', ass)
-    else:
-        try:
-            main(args, argc)
-        except AssertionError as ass:
-            print(f'[ERROR] {ass}')
-            exit(1)
-        finally:
-            exit(2)
+        exit(1)
+    try:
+        main(args, argc)
+    except AssertionError as ass:
+        print(f'[ERROR] {ass}')
+        exit(2)
     exit(0)

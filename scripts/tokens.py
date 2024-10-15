@@ -1,4 +1,4 @@
-from .operators import *
+from .constants import *
 
 Number = int | float
 
@@ -27,10 +27,11 @@ def check_range(number: Number, from_val: Number, to_val: Number):
 STRING = 'STRING'
 FLOAT  = 'FLOAT'
 INT    = 'INTEGER'
-NUMBER = [FLOAT, INT]
+NUM    = [FLOAT, INT]
 OPER   = 'OPERATOR'
 MOD    = 'MODIFIER'
 NAME   = 'NAME'
+COMM   = 'COMMAND'
 
 class Token:
     def __init__(self, type: str, value: str | None = None):
@@ -66,6 +67,8 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
     i = 0
     while i < len(argv):
         arg = argv[i]
+        if arg in COMMANDS:
+            tokens.append(Token(COMM, arg))
         if arg in MODIFIERS:
             tokens.append(Token(MOD, arg))
         elif arg in OPERATORS:

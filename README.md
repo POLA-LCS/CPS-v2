@@ -1,4 +1,4 @@
-# CPS v2.0 (Command Prompt Saver)
+# CPS v2.0.1 (Command Prompt Saver)
 
 ## Work in progress
 
@@ -13,7 +13,7 @@ and the way CPS v1 is writed it is a little too bad.
 
 ### New implementations
 - Multi-line operations:
-The line: `macro + 'echo Hello' 'echo Goodbye'`
+The line: `macro + 'echo Hello' 'echo Goodbye'`  
 executes `macro + 'echo Hello'` and `cps macro + 'echo Goodbye'`.
 
 - Disable output messages:
