@@ -14,7 +14,7 @@ and the way CPS v1 is writed it is a little too bad.
 ## New implementations
 - **Multi-line operations**:  
 The line: `macro + 'echo Hello' 'echo Goodbye'`  
-executes `macro + 'echo Hello'` and `cps macro + 'echo Goodbye'`.
+executes `macro + 'echo Hello'` and `macro + 'echo Goodbye'`.
 
 - **Disable output messages**:  
 Each time you type a instruction there's an output message. Output message of:  
