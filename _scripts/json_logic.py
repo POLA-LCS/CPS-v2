@@ -19,7 +19,7 @@ DEFAULT_MACRO: Macro = Macro("print", {"value": "Hello, CPS!"}, ["echo #value", 
 
 def create_json_file(path: str, folder_path: str | None = None):
     path = get_path(folder_path, path)
-    print(f'[DEBUG] creating json: {path}')
+    print(f'[DEBUG] Creating json: {path}...')
 
     if folder_path is not None and not os.path.exists(folder_path):
         os.makedirs(folder_path)

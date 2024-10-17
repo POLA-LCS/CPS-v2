@@ -43,7 +43,6 @@ class MacroList:
         print(f'[CPS] {macro.name}:')
         for line in macro.code:
             print(f'-  {line}')
-        print()
 
     def run(cls, macro: Macro):
         for line in macro.code:

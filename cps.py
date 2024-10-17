@@ -36,7 +36,7 @@ Delete:
     Mac - .    Delete Mac first line
 """)
 
-def cps(message: str, printable: bool):
+def cps(message: str, printable = True):
     if printable:
         print(f'[CPS] {message}')
 
@@ -46,13 +46,20 @@ def cps_input(message: str, printable: bool):
     return 'Y'
 
 def main(argv: list[str], argc: int, printable = True):
-    tokens = tokenize_argv(argv)
     try:
-        macro_dict = load_json_file(DATA_PATH + '\\' + MACROS_JSON)
+        macro_dict = load_json_file(get_path(DATA_PATH, MACROS_JSON))
+        
     except FileNotFoundError:
-        create_json_file(DATA_PATH, MACROS_JSON)
+        cps('It seems the macros.json file path doesn\'t exists')
+        if input('    Create? (Y / ...) >> ').upper() == 'Y':
+            create_json_file(MACROS_JSON, DATA_PATH)
+            return main(argv, argc, printable)
+
+    except json.decoder.JSONDecodeError:
+        dump_json_file(get_path(DATA_PATH, MACROS_JSON), {}, DEFAULT_MACRO.get_dict_format())
         return main(argv, argc, printable)
     
+    tokens = tokenize_argv(argv)
     macros = MacroList([Macro(key, *content) for key, content in macro_dict.items()])
         
     # Run default macro
@@ -96,14 +103,14 @@ def main(argv: list[str], argc: int, printable = True):
         elif oper == APP:
             macro = macros.get(name) # assert
             macro.code.append(string)
-
             cps(f'Append {name}: {string}', printable)
+
         elif oper == PRE:
             macro = macros.get(name) # assert
-            cps(f'Preppend {name}: {string}', printable)
             macro.code.insert(0, string)
+            cps(f'Preppend {name}: {string}', printable)
         
-    # DUMP, EXTEND, PREXTEND
+    # DUMP, EXTEND MACRO, PREXTEND MACRO, SWAP
     elif [NAME, OPER, NAME] == tokens:
         target_name, oper, from_name = extract_values(tokens)
         target = macros.get(from_name)
@@ -147,39 +154,40 @@ def main(argv: list[str], argc: int, printable = True):
             if mod == NULL:
                 macro = macros.get(name) # assert
                 macros.get_len(macro)    # assert
-                cps(f'Pop last {name}: {macro.code.pop()}', printable)
+                cps(f'Pop {name}: {macro.code.pop()}', printable)
 
         elif oper == PRE:
             if mod == NULL:
                 macro = macros.get(name) # assert
                 macros.get_len(macro)    # assert
-                cps(f'Pop first {name}: {macro.code.pop(0)}', printable)
-                
+                cps(f'Pop {name}: {macro.code.pop(0)}', printable)
+      
+    # INSERT          
     elif [NAME, INT, STRING] == tokens:
         name, integer, string = extract_values(tokens)
         integer = int(integer)
         macro = macros.get(name)
         macro_len = macros.get_len(macro, False)
-        if 0 >= integer < macro_len:
-            macro.code.insert(integer, string)
-            cps(f'Insert in {integer}: {name} << {string}')
-        else:
-            cps(f'Out of range {name}(0, {macro_len}): {integer}.', printable)
+        assert 0 >= integer < macro_len, f'Out of range {name}(0, {macro_len}): {integer}.'
+        macro.code.insert(integer, string)
+        cps(f'Insert in {integer}: {name} << {string}', printable)
                 
+    # SET, CONCATENATE, PRE-CONCATENATE
     elif [NAME, INT, OPER, STRING] == tokens:
         name, integer, oper, string = extract_values(tokens)
         integer = int(integer)
         macro = macros.get(name)
         macro_len = macros.get_len(macro, False)
-        if 0 >= integer < macro_len:
-            if oper == SET:
-                macro.code[integer] = string
-            elif oper == APP:
-                macro.code[integer] += string
-            elif oper == PRE:
-                macro.code[integer] = string + macro.code[integer]
-        else:
-            cps(f'Out of range {name}(0, {macro_len}): {integer}.', printable)
+        assert 0 >= integer < macro_len, f'Out of range {name}(0, {macro_len}): {integer}.'
+        if oper == SET:
+            macro.code[integer] = string
+            cps(f'Override {name}: {integer} <= {string}')
+        elif oper == APP:
+            macro.code[integer] += string
+            cps(f'Concatenated {name}: {integer} <+ {string}', printable)
+        elif oper == PRE:
+            macro.code[integer] = string + macro.code[integer]
+            cps(f'Concatenated {name}: {string} +> {integer}')
                 
     # No output message
     elif partial_match([MOD], tokens):
@@ -188,17 +196,17 @@ def main(argv: list[str], argc: int, printable = True):
             main(argv[1:], argc - 1, False)
 
     # Multi-line execute
-    elif partial_match([NAME, OPER], tokens):
-        match_value, rest = partial_split(2, tokens)
-        name, oper = match_value
+    elif partial_match([NAME], tokens):
+        match_value, rest = partial_split(1, tokens)
         for line in rest:
-            main(match_value + [f"'{line.value}'" if line.type == STRING else line.value], 3, printable)
+            repetition_code = match_value + [f"'{line.value}'" if line.type == STRING else line.value]
+            main(repetition_code, len(repetition_code), printable)
 
     else:
         cps(f'Invalid instruction sequence: {tokens}.', printable)
     try:
         dump_json_file(
-            DATA_PATH + '\\' + MACROS_JSON,
+            get_path(DATA_PATH, MACROS_JSON),
             dict([macro.get_dict_format() for macro in macros.list_of]),
             (DEFAULT_MACRO.name, DEFAULT_MACRO.get_dict_format())
         )
@@ -211,19 +219,21 @@ if __name__ == '__main__':
     argc = len(args)
     
     if argc == 0:
-        print('CPS v2.0.1 2024')
+        print('CPS v2.0.3 2024')
         print('| Type "--help" to get the help message.')
         print('| "exit" to closes the interpreter.')
     
-        while (line := input('\n>>> ')) != 'exit':
-            try:
-                main(chunks := line.split(' '), len(chunks))
-            except AssertionError as ass:
-                print('[ERROR]', ass)
+        try:
+            while (line := input('\n>>> ')) != 'exit':
+                try:
+                    main(chunks := line.split(' '), len(chunks))
+                except AssertionError as ass:
+                    print('[ERROR]', ass)
+        except EOFError:
+            cps('Exit from keyboard interruption.')
         exit(1)
     try:
         main(args, argc)
-            
     except AssertionError as ass:
         print(f'[ERROR] {ass}')
         exit(2)
