@@ -1,4 +1,4 @@
-# CPS v2.0.3 (Command Prompt Saver)
+# CPS v2.0.4 (Command Prompt Saver)
 
 ## Work in progress
 
