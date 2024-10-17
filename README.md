@@ -23,6 +23,5 @@ executes `macro + 'echo Hello'` and `macro + 'echo Goodbye'`.
 - **Disable output messages**:  
 Each time you type an instruction there's an output message. Output message of:  
 `goodbye = 'rmdir C:\Windows\system32'` is `[CPS] Created: goodbye`  
-  
 Starting the line with "." makes the output messages to disable for that instruction.  
 `. message = 'echo The output message must not display'`
