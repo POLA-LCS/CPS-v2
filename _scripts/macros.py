@@ -1,5 +1,5 @@
 from os import system
-from .types import *
+from .constants import *
 from .tokens import NULL, EXTRA
 
 class Macro:

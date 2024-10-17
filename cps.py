@@ -1,7 +1,5 @@
 from _scripts import *
 
-VERSION = '2.1'
-
 # Run:
 #     <nothing>     Run default macro with default arguments
 #     Mac             Run Mac with default arguments
@@ -12,10 +10,6 @@ VERSION = '2.1'
 
 def display_help():
     print("""[USAGE]
-          
-Nomenclature:
-    Mac = Macro name
-    Str = String
 Info:
     (--help | -h)      Display this message
     (--info | -i)      Display the macros dictionary info
@@ -24,18 +18,34 @@ Info:
     Mac --info         Display the macro Mac info
     
 Set:
-    Mac = Str    Create Mac with the line Str
+    Mac = Str    Create macro Mac with the code Str
     Mac + Str    Append Str to Mac
     Mac - Str    Prepend Str to Mac
+
     Mac = Mac2    Override the Mac code with the Mac2 code
     Mac + Mac2    Extend Mac2 code into Mac code
     Mac - Mac2    Prextend Mac2 code into Mac code (not reverse)
     Mac # Mac2    Swap Mac with Mac2
 
+    Mac Int = Str    Set the line number Int - 1 of Mac to Str
+    Mac Int + Str    Concat Str to Mac line in index Int
+    Mac Int - Str    Prepend Str to Mac line in index Int
+
 Delete:
     Mac = .    Delete Mac
-    Mac + .    Delete Mac last line
-    Mac - .    Delete Mac first line
+    Mac + .    Pop last Mac line
+    Mac - .    Pop first Mac line
+
+    Mac Int = .    Delete Mac line in index Int
+    Mac Int + .    Pop last of Mac line in index Int 
+    Mac Int - .    Pop first of Mac line in index Int
+    
+Call:
+    Mac ! <args>    Call Mac with the specified arguments
+    Note: NULL uses the default value of the parameter.
+
+    Mac ! Name Value    Set the Mac parameter Name to Value
+    Mac ! Name NULL     Delete the Mac parameter Name
 """)
 
 def cps(message: str, printable = True):
@@ -50,6 +60,7 @@ def main(argv: list[str], argc: int, printable = True):
         cps('It seems the macros.json file path doesn\'t exists')
         if input('    Create? (Y / ...) >> ').upper() == 'Y':
             create_json_file(MACROS_JSON, DATA_PATH)
+            dump_json_file(get_path(DATA_PATH, MACROS_JSON), {}, DEFAULT_MACRO.get_dict_format())
             return main(argv, argc, printable)
 
     except json.decoder.JSONDecodeError:
@@ -69,10 +80,11 @@ def main(argv: list[str], argc: int, printable = True):
         
     # Run default macro
     if argc == 0:
-        macros.run(macros.check('0'))
+        default_macro = macros.check('0')
+        run_macro(default_arguments(default_macro.code, default_macro.parameters))
     
     # Display HELP
-    elif [COMM] == tokens:
+    elif COMM == tokens[0]:
         comm = tokens[0].value
         if comm in [HELP_FULL, HELP_INIT]:
             display_help()
@@ -91,17 +103,17 @@ def main(argv: list[str], argc: int, printable = True):
     elif [NAME, COMM] == tokens:
         name, oper = extract_values(tokens)
         if oper in [INFO_FULL, INFO_INIT]:
-            macros.display_info(macros.check(name)) # assert
+            display_info(macros.check(name)) # assert
             
     # MODIFY PARAMETERS
-    elif [NAME, EXTRA, NAME, [STRING, NUMBER]] == tokens:
+    elif [NAME, EXTRA, NAME, [STRING, INT, FLOAT]] == tokens:
         name, _, param_name, param_value = extract_values(tokens)
         macro = macros.check(name)
-        macro.parameters[param_name] = param_value
         if param_name in macro.parameters:
             cps(f'Override {name} argument {param_name}: {param_value}')
         else:
             cps(f'Created {param_name} for {name}: {param_value}')
+        macro.parameters[param_name] = param_value
 
     # DELETE PARAMETERS
     elif [NAME, EXTRA, NAME, NULL] == tokens:
