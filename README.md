@@ -1,10 +1,10 @@
-# CPS v2.0.1 (Command Prompt Saver)
+# CPS v2.0.3 (Command Prompt Saver)
 
 ## Work in progress
 
 **TODO** list:
-- Add parameters to the macros.
-- Add the `cps.json` file to save the state of the macros.
+- Add parameter value replacing for macros.
+- Add variable manipulation.
 
 ## Why?
 The last version of CPS ([See here](https://github.com/POLA-LCS/CPS))  
