@@ -131,7 +131,12 @@ def partial_match(match_list: list[str], tokens: list[Token]):
     tokens = tokens[:len(match_list)]
     return (match_list == tokens)
 
-def partial_split(match_len: int, tokens: list[Token]):
+def partial_extract(match_len: int, tokens: list[Token]):
     """Returns the values of the first slice and the tokens of the second\n
-    lit: `extract_values(tokens[:match_len]), tokens[match_len:]`"""
+    lit:
+    ```
+    return extract_values(
+        tokens[:match_len]
+    ), tokens[match_len:]
+    ```"""
     return (extract_values(tokens[:match_len]), tokens[match_len:])

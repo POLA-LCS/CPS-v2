@@ -1,17 +1,18 @@
 from os import system
 from .types import *
+from .tokens import NULL, EXTRA
 
 class Macro:
-    def __init__(self, name: str, param: Param, code: Code):
+    def __init__(self, name: str, parameters: Param, code: Code):
         self.name = name
-        self.param = param
+        self.parameters = parameters
         self.code = code
         
     def get_dict_format(self):
-        return (self.name, (self.param, self.code))
+        return (self.name, (self.parameters, self.code))
 
     def __repr__(self):
-        return f"{self.name}({self.param}){self.code}"
+        return f"{self.name}({self.parameters}){self.code}"
     
 # MAIN MACRO LIST
 class MacroList:
@@ -24,8 +25,8 @@ class MacroList:
         cls.list_of = macro_list
         return cls._instance
 
-    def add(cls, name: str, param: Param, code: Code):
-        cls.list_of.append(Macro(name, param, code))
+    def add(cls, name: str, parameters: Param, code: Code):
+        cls.list_of.append(Macro(name, parameters, code))
 
     def check(cls, name: str, error = True):
         for macro in cls.list_of:
@@ -45,6 +46,35 @@ class MacroList:
         for line in macro.code:
             print(f'-  {line}')
 
-    def run(cls, macro: Macro):
-        for line in macro.code:
-            system(line)
+def run_macro(code: Code):
+    for line in code:
+        system(line)
+        
+PARAM_PREFIX = EXTRA + EXTRA
+        
+def default_arguments(code: Code, parameters: Param):
+    if len(parameters) == 0:
+        return code
+    formated_code: Code = []
+    for line in code:
+        for param in parameters:
+            line = line.replace(PARAM_PREFIX + param, parameters[param])
+        formated_code.append(line)
+    return formated_code
+
+def replace_arguments(macro: Macro, argv: list[str] | None = None):
+    if not argv:
+        return default_arguments(macro.code, macro.parameters)
+    
+    if len(macro.parameters) == 0:
+        return macro.code
+
+    formated_code: Code = []
+    for line in macro.code:
+        for i, param in enumerate(macro.parameters):
+            line = line.replace(
+                PARAM_PREFIX + param,
+                argv[i] if (len(argv) > i and argv[i] != NULL) else macro.parameters[param]
+            )
+        formated_code.append(line)
+    return formated_code

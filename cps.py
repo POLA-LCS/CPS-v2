@@ -85,15 +85,25 @@ def main(argv: list[str], argc: int, printable = True):
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
                 
-    # CALL
+    # CALL WITH DEFAULT ARGUMENTS
     elif [NAME] == tokens:
-        macros.run(macros.check(tokens[0].value)) # assert
+        macro = macros.check(tokens[0].value)
+        run_macro(default_arguments(macro.code, macro.parameters))
     
     # INFO
     elif [NAME, COMM] == tokens:
         name, oper = extract_values(tokens)
         if oper in [INFO_FULL, INFO_INIT]:
             macros.display_info(macros.check(name)) # assert
+            
+    elif partial_match([NAME, MOD], tokens):
+        matches, rest = partial_extract(2, tokens)
+        name, mod = matches
+        macro = macros.check(name)
+        if mod == EXTRA:
+            run_macro(
+                replace_arguments(macro, extract_values(rest))
+            )
             
     # CREATE, OVERRIDE, APPEND, PREPPEND
     elif [NAME, OPER, STRING] == tokens:
@@ -172,7 +182,7 @@ def main(argv: list[str], argc: int, printable = True):
     # INSERT          
     elif [NAME, INT, STRING] == tokens:
         name, integer, string = extract_values(tokens)
-        macro = assert_index(name, integer)
+        macro, integer = assert_index(name, integer)
         macro.code.insert(integer, string)
         cps(f'Insert in {name}[{integer}]: {string}', printable)
                 
@@ -216,15 +226,15 @@ def main(argv: list[str], argc: int, printable = True):
                 
     # No output message
     elif partial_match([MOD], tokens):
-        mod, rest = partial_split(1, tokens)
+        mod, rest = partial_extract(1, tokens)
         if mod[0] == NULL:
             main(argv[1:], argc - 1, False)
 
     # Multi-line execute
     elif partial_match([NAME], tokens):
-        match_value, rest = partial_split(1, tokens)
+        matches, rest = partial_extract(1, tokens)
         for line in rest:
-            repetition_code = match_value + [f"'{line.value}'" if line.type == STRING else line.value]
+            repetition_code = matches + [f"'{line.value}'" if line.type == STRING else line.value]
             main(repetition_code, len(repetition_code), printable)
 
     else:
@@ -233,7 +243,7 @@ def main(argv: list[str], argc: int, printable = True):
         dump_json_file(
             get_path(DATA_PATH, MACROS_JSON),
             dict([macro.get_dict_format() for macro in macros.list_of]),
-            (DEFAULT_MACRO.name, DEFAULT_MACRO.get_dict_format())
+            DEFAULT_MACRO.get_dict_format()
         )
     except FileNotFoundError:
         print('[ERROR] Failed to dump macros to JSON file.')
