@@ -1,11 +1,5 @@
-from scripts import *
+from _scripts import *
 
-# TODO
-# from os.path import dirname, abspath
-# import json
-# PATH = dirname(abspath(__file__))
-# JSON_PATH = PATH + '/cps.json, printable'
-# INDENT = 4
 # Run:
 #     <nothing>     Run default macro with default arguments
 #     Mac             Run Mac with default arguments
@@ -23,7 +17,7 @@ Nomenclature:
 
 Info:
     --help      Display this message
-    --info      Display the macros info
+    --info      Display the macros dictionary info
     --version   Display the version 
     Mac --info    Display the macro Mac info
     
@@ -53,10 +47,17 @@ def cps_input(message: str, printable: bool):
 
 def main(argv: list[str], argc: int, printable = True):
     tokens = tokenize_argv(argv)
+    try:
+        macro_dict = load_json_file(DATA_PATH + '\\' + MACROS_JSON)
+    except FileNotFoundError:
+        create_json_file(DATA_PATH, MACROS_JSON)
+        return main(argv, argc, printable)
     
+    macros = MacroList([Macro(key, *content) for key, content in macro_dict.items()])
+        
     # Run default macro
     if argc == 0:
-        run_macro(macros['0'])
+        macros.run(macros.get('0'))
     
     # Display HELP
     elif [COMM] == tokens:
@@ -64,85 +65,121 @@ def main(argv: list[str], argc: int, printable = True):
         if comm in [HELP_FULL, HELP_INIT]:
             display_help()
         elif comm in [INFO_FULL, INFO_INIT]:
-            for Mac in macros:
-                display_macro_info(Mac)
-                print()
+            for mac in macros.list_of:
+                macros.display_info(mac)
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
                 
     # CALL
     elif [NAME] == tokens:
-        name = tokens[0].value
-        check_macro(name) # assert
-        run_macro(macros[name])
+        macros.run(macros.get(tokens[0].value)) # assert
     
     # INFO
-    elif [NAME, OPER] == tokens:
+    elif [NAME, COMM] == tokens:
         name, oper = extract_values(tokens)
         if oper in [INFO_FULL, INFO_INIT]:
-            check_macro(name) # assert
-            display_macro_info(name)
+            macros.display_info(macros.get(name)) # assert
             
     # CREATE, OVERRIDE, APPEND, PREPPEND
     elif [NAME, OPER, STRING] == tokens:
         name, oper, string = extract_values(tokens)
+        
         if oper == SET:
-            if check_macro(name, False) is None: # get
-                macros[name] = [] if string == '' else [string]
+            macro = macros.get(name, False)
+            if macro is None: # get
+                macros.add(name, {}, [] if string == '' else [string])
                 cps(f'Create: {name}', printable)
             elif cps_input('Override existing macro? (Y / ...)', printable) == 'Y':
-                macros[name] = [] if string == '' else [string]
+                macro.code = [] if string == '' else [string]
                 cps(f'Override: {name}', printable)
+
         elif oper == APP:
-            check_macro(name) # assert
-            macros[name].append(string)
+            macro = macros.get(name) # assert
+            macro.code.append(string)
+
             cps(f'Append {name}: {string}', printable)
         elif oper == PRE:
-            check_macro(name) # assert
+            macro = macros.get(name) # assert
             cps(f'Preppend {name}: {string}', printable)
-            macros[name].insert(0, string)
+            macro.code.insert(0, string)
         
     # DUMP, EXTEND, PREXTEND
     elif [NAME, OPER, NAME] == tokens:
-        to_name, oper, from_name = extract_values(tokens)
-        check_macro(from_name)
+        target_name, oper, from_name = extract_values(tokens)
+        target = macros.get(from_name)
+
         if oper == SET:
-            macros[to_name] = [line for line in macros[from_name]]
-            cps(f'Dump: {from_name} => {to_name}', printable)
+            if (macro := macros.get(target_name, False)) is None:
+                macros.add(target_name, target.param, target.code)
+                cps(f'Created: {target_name} <= {from_name}', printable)
+            else:
+                macro.param = target.param
+                macro.code = target.code
+                cps(f'Override: {target_name} <= {from_name}', printable)
+
         elif oper == APP:
-            check_macro(to_name)
-            macros[to_name].extend(macros[from_name])
-            cps(f'Extend: {from_name} -> {to_name}', printable)
+            macro = macros.get(target_name)
+            macro.code.extend(target.code)
+            cps(f'Extend: {target_name} << {from_name}', printable)
+            
         elif oper == PRE:
-            check_macro(to_name)
-            for i, line in enumerate(macros[from_name]):
-                macros[to_name].insert(i, line)
-            cps(f'Prextend: {from_name} -> {to_name}', printable)
+            macro = macros.get(target_name)
+            for i, line in enumerate(target.code):
+                macro.code.insert(i, line)
+            cps(f'Prextend: {from_name} >> {target_name}', printable)
+
         elif oper == SWP:
-            check_macro(to_name)
-            macro_pivot = macros[to_name]
-            macros[to_name] = macros[from_name]
-            macros[from_name] = macro_pivot
-            cps(f'Swap: {to_name} <=> {from_name}', printable)
+            macro = macros.get(target_name)
+            macro, target = target, macro
+            cps(f'Swap: {target_name} <=> {from_name}', printable)
             
     # DELETE, POP FIRST, POP LAST
     elif [NAME, OPER, MOD] == tokens:
         name, oper, mod = extract_values(tokens)
+
         if oper == SET:
             if mod == NULL:
-                check_macro(name)
-                macros.pop(name)
-                cps(f'Deleted: {name}', printable)
+                macro = macros.get(name)
+                macros.list_of.remove(macro)
+                cps(f'Delete: {name}', printable)
+
         elif oper == APP:
             if mod == NULL:
-                check_macro(name)
-                check_macro_len(name)
-                cps(f'Pop last {name}: {macros[name].pop()}', printable)
+                macro = macros.get(name) # assert
+                macros.get_len(macro)    # assert
+                cps(f'Pop last {name}: {macro.code.pop()}', printable)
+
         elif oper == PRE:
             if mod == NULL:
-                check_macro(name)
-                check_macro_len(name)
-                cps(f'Pop first {name}: {macros[name].pop(0)}', printable)
+                macro = macros.get(name) # assert
+                macros.get_len(macro)    # assert
+                cps(f'Pop first {name}: {macro.code.pop(0)}', printable)
+                
+    elif [NAME, INT, STRING] == tokens:
+        name, integer, string = extract_values(tokens)
+        integer = int(integer)
+        macro = macros.get(name)
+        macro_len = macros.get_len(macro, False)
+        if 0 >= integer < macro_len:
+            macro.code.insert(integer, string)
+            cps(f'Insert in {integer}: {name} << {string}')
+        else:
+            cps(f'Out of range {name}(0, {macro_len}): {integer}.', printable)
+                
+    elif [NAME, INT, OPER, STRING] == tokens:
+        name, integer, oper, string = extract_values(tokens)
+        integer = int(integer)
+        macro = macros.get(name)
+        macro_len = macros.get_len(macro, False)
+        if 0 >= integer < macro_len:
+            if oper == SET:
+                macro.code[integer] = string
+            elif oper == APP:
+                macro.code[integer] += string
+            elif oper == PRE:
+                macro.code[integer] = string + macro.code[integer]
+        else:
+            cps(f'Out of range {name}(0, {macro_len}): {integer}.', printable)
                 
     # No output message
     elif partial_match([MOD], tokens):
@@ -156,6 +193,17 @@ def main(argv: list[str], argc: int, printable = True):
         name, oper = match_value
         for line in rest:
             main(match_value + [f"'{line.value}'" if line.type == STRING else line.value], 3, printable)
+
+    else:
+        cps(f'Invalid instruction sequence: {tokens}.', printable)
+    try:
+        dump_json_file(
+            DATA_PATH + '\\' + MACROS_JSON,
+            dict([macro.get_dict_format() for macro in macros.list_of]),
+            (DEFAULT_MACRO.name, DEFAULT_MACRO.get_dict_format())
+        )
+    except FileNotFoundError:
+        print('[ERROR] Failed to dump macros to JSON file.')
         
 from sys import argv
 if __name__ == '__main__':
@@ -163,7 +211,7 @@ if __name__ == '__main__':
     argc = len(args)
     
     if argc == 0:
-        print('CPS v2.0 2024')
+        print('CPS v2.0.1 2024')
         print('| Type "--help" to get the help message.')
         print('| "exit" to closes the interpreter.')
     
@@ -175,6 +223,7 @@ if __name__ == '__main__':
         exit(1)
     try:
         main(args, argc)
+            
     except AssertionError as ass:
         print(f'[ERROR] {ass}')
         exit(2)
