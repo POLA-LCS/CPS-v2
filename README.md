@@ -9,11 +9,11 @@ The last version of CPS ([See here](https://github.com/POLA-LCS/CPS)) it's OK, b
 I am open to future implementations and the way CPS v1 was coded it's a little too _bad_.
 
 ## New implementations
-- **Console REPL**:  
-The CPS v2 has a Read-Eval-Print-Loop, so you can setup your CPS easily.  
+- **Console REPL:**  
+The CPS v2 has a **Read-Eval-Print-Loop**, so you can setup your **CPS** easily.  
 Try it by typing `cps.py --repl`
 
-- **Indexation**
+- **Indexation:**  
 NOW you can modify your macro code lines by index :O
 
 - **Multi-line operations**:  
