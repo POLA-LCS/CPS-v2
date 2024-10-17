@@ -27,17 +27,18 @@ class MacroList:
     def add(cls, name: str, param: Param, code: Code):
         cls.list_of.append(Macro(name, param, code))
 
-    def get(cls, name: str, error = True):
+    def check(cls, name: str, error = True):
         for macro in cls.list_of:
             if macro.name == name:
                 return macro
         assert not error, f"Macro doesn't exists: {name}"
         return None
 
-    def get_len(cls, macro: Macro, error = True):
+    def check_len(cls, macro: Macro, error = True):
+        length = len(macro.code)
         if error:
-            assert macro is not None, f"Macro is empty: {macro.name}" 
-        return len(macro.code)
+            assert length != 0, f"Macro is empty: {macro.name}" 
+        return length
 
     def display_info(cls, macro: Macro):
         print(f'[CPS] {macro.name}:')

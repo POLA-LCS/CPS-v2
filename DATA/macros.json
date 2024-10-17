@@ -1,0 +1,20 @@
+{
+    "print": [
+        "print",
+        [
+            {
+                "value": "Hello, CPS!"
+            },
+            [
+                "echo #value",
+                "echo."
+            ]
+        ]
+    ],
+    "cls": [
+        {},
+        [
+            "cls"
+        ]
+    ]
+}
