@@ -2,6 +2,7 @@ from .macros import Macro
 from .types import *
 import os
 import json
+from platform import system as operative_system
 
 def get_local_path():
     return (LOCAL := os.path.dirname(os.path.abspath(__file__)))[:LOCAL.rfind('\\')]
@@ -15,7 +16,7 @@ MACROS_JSON = 'macros.json'
 VARS_JSON   = 'vars.json'
 INDENT = 4
 
-DEFAULT_MACRO: Macro = Macro("print", {"value": "Hello, CPS!"}, ["echo !!value", "echo."])
+DEFAULT_MACRO: Macro = Macro("0", {}, ["cls" if operative_system() == "Windows" else "clear"])
 
 def create_json_file(path: str, folder_path: str | None = None):
     path = get_path(folder_path, path)

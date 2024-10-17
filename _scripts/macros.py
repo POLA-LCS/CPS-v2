@@ -41,10 +41,10 @@ class MacroList:
             assert length != 0, f"Macro is empty: {macro.name}" 
         return length
 
-    def display_info(cls, macro: Macro):
-        print(f'[CPS] {macro.name}:')
-        for line in macro.code:
-            print(f'-  {line}')
+def display_info(macro: Macro):
+    print(f'[CPS] {macro.name}: {macro.parameters}:')
+    for line in macro.code:
+        print(f'-  {line}')
 
 def run_macro(code: Code):
     for line in code:

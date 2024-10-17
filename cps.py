@@ -1,5 +1,7 @@
 from _scripts import *
 
+VERSION = '2.1'
+
 # Run:
 #     <nothing>     Run default macro with default arguments
 #     Mac             Run Mac with default arguments
@@ -14,12 +16,12 @@ def display_help():
 Nomenclature:
     Mac = Macro name
     Str = String
-
 Info:
-    --help      Display this message
-    --info      Display the macros dictionary info
-    --version   Display the version 
-    Mac --info    Display the macro Mac info
+    (--help | -h)      Display this message
+    (--info | -i)      Display the macros dictionary info
+    (--version | -v)   Display the version 
+    (--repl | -r)      Open the Read-Eval-Print-Loop
+    Mac --info         Display the macro Mac info
     
 Set:
     Mac = Str    Create Mac with the line Str
@@ -40,11 +42,6 @@ def cps(message: str, printable = True):
     if printable:
         print(f'[CPS] {message}')
 
-def cps_input(message: str, printable: bool):
-    if printable:
-        return input(f'[CPS] {message} >> ')
-    return 'Y'
-
 def main(argv: list[str], argc: int, printable = True):
     try:
         macro_dict = load_json_file(get_path(DATA_PATH, MACROS_JSON))
@@ -62,7 +59,7 @@ def main(argv: list[str], argc: int, printable = True):
     tokens = tokenize_argv(argv)
     macros = MacroList([Macro(key, *content) for key, content in macro_dict.items()])
         
-    # Assistants
+    # Index assistant
     def assert_index(name: str, index: str) -> tuple[Macro, int]:
         index = int(index)
         macro = macros.check(name)
@@ -81,7 +78,7 @@ def main(argv: list[str], argc: int, printable = True):
             display_help()
         elif comm in [INFO_FULL, INFO_INIT]:
             for mac in macros.list_of:
-                macros.display_info(mac)
+                display_info(mac)
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
                 
@@ -96,14 +93,32 @@ def main(argv: list[str], argc: int, printable = True):
         if oper in [INFO_FULL, INFO_INIT]:
             macros.display_info(macros.check(name)) # assert
             
-    elif partial_match([NAME, MOD], tokens):
-        matches, rest = partial_extract(2, tokens)
-        name, mod = matches
+    # MODIFY PARAMETERS
+    elif [NAME, EXTRA, NAME, [STRING, NUMBER]] == tokens:
+        name, _, param_name, param_value = extract_values(tokens)
         macro = macros.check(name)
-        if mod == EXTRA:
-            run_macro(
-                replace_arguments(macro, extract_values(rest))
-            )
+        macro.parameters[param_name] = param_value
+        if param_name in macro.parameters:
+            cps(f'Override {name} argument {param_name}: {param_value}')
+        else:
+            cps(f'Created {param_name} for {name}: {param_value}')
+
+    # DELETE PARAMETERS
+    elif [NAME, EXTRA, NAME, NULL] == tokens:
+        name, _, param_name, _ = extract_values(tokens)
+        macro = macros.check(name)
+        assert param_name in macro.parameters, f"{name}'s parameter {param_name} doesn't exists."
+        macro.parameters.pop(param_name)
+        cps(f'Delete from {name}: {param_name}')
+        
+    # INPUT ARGUMENTS
+    elif partial_match([NAME, EXTRA], tokens):
+        matches, rest = partial_extract(2, tokens)
+        name, _ = matches
+        macro = macros.check(name)
+        run_macro(
+            replace_arguments(macro, extract_values(rest))
+        )
             
     # CREATE, OVERRIDE, APPEND, PREPPEND
     elif [NAME, OPER, STRING] == tokens:
@@ -114,7 +129,7 @@ def main(argv: list[str], argc: int, printable = True):
             if macro is None: # check
                 macros.add(name, {}, [] if string == '' else [string])
                 cps(f'Create: {name}', printable)
-            elif cps_input('Override existing macro? (Y / ...)', printable) == 'Y':
+            elif not printable or input('[CPS] Override existing macro? (Y / ...) >> ') == 'Y':
                 macro.code = [] if string == '' else [string]
                 cps(f'Override: {name}', printable)
 
@@ -135,10 +150,10 @@ def main(argv: list[str], argc: int, printable = True):
 
         if oper == SET:
             if (macro := macros.check(target_name, False)) is None:
-                macros.add(target_name, target.param, target.code)
+                macros.add(target_name, target.parameters, target.code)
                 cps(f'Created: {target_name} <= {from_name}', printable)
             else:
-                macro.param = target.param
+                macro.parameters = target.parameters
                 macro.code = target.code
                 cps(f'Override: {target_name} <= {from_name}', printable)
 
@@ -159,27 +174,24 @@ def main(argv: list[str], argc: int, printable = True):
             cps(f'Swap: {target_name} <=> {from_name}', printable)
             
     # DELETE, POP FIRST, POP LAST
-    elif [NAME, OPER, MOD] == tokens:
-        name, oper, mod = extract_values(tokens)
+    elif [NAME, OPER, NULL] == tokens:
+        name, oper, _ = extract_values(tokens)
 
         if oper == SET:
-            if mod == NULL:
-                macros.list_of.remove(macros.check(name))
-                cps(f'Delete: {name}', printable)
+            macros.list_of.remove(macros.check(name))
+            cps(f'Delete: {name}', printable)
 
         elif oper == APP:
-            if mod == NULL:
-                macro = macros.check(name) # assert
-                macros.check_len(macro)    # assert
-                cps(f'Pop {name}: {macro.code.pop()}', printable)
+            macro = macros.check(name) # assert
+            macros.check_len(macro)    # assert
+            cps(f'Pop {name}: {macro.code.pop()}', printable)
 
         elif oper == PRE:
-            if mod == NULL:
-                macro = macros.check(name) # assert
-                macros.check_len(macro)    # assert
-                cps(f'Pop {name}: {macro.code.pop(0)}', printable)
+            macro = macros.check(name) # assert
+            macros.check_len(macro)    # assert
+            cps(f'Pop {name}: {macro.code.pop(0)}', printable)
       
-    # INSERT          
+    # INSERT
     elif [NAME, INT, STRING] == tokens:
         name, integer, string = extract_values(tokens)
         macro, integer = assert_index(name, integer)
@@ -203,32 +215,28 @@ def main(argv: list[str], argc: int, printable = True):
             macro.code[integer] = str_mod + macro.code[integer]
             cps(f'Concat {name}[{integer}]: {str_mod}', printable)
                 
-    elif [NAME, INT, OPER, MOD] == tokens:
-        name, integer, oper, mod = extract_values(tokens)
+    # DELETE LINE, POP LAST OF LINE, POP FIRST OF LINE
+    elif [NAME, INT, OPER, NULL] == tokens:
+        name, integer, oper, _ = extract_values(tokens)
         macro, integer = assert_index(name, integer)
         
         if oper == SET:
-            if mod == NULL:
-                macro.code.pop(integer)
-                cps(f'Delete: {name}[{integer}]')
+            macro.code.pop(integer)
+            cps(f'Delete: {name}[{integer}]')
 
         elif oper == APP:
-            if mod == NULL:
-                last = macro.code[integer][-1]
-                macro.code[integer] = macro.code[integer][:-1]
-                cps(f'Pop {name}[{integer}]: {last}')
+            last = macro.code[integer][-1]
+            macro.code[integer] = macro.code[integer][:-1]
+            cps(f'Pop {name}[{integer}]: {last}')
 
         elif oper == PRE:
-            if mod == NULL:
-                first = macro.code[integer][0]
-                macro.code[integer] = macro.code[integer][1:]
-                cps(f'Pop {name}[{integer}]: {first}')
+            first = macro.code[integer][0]
+            macro.code[integer] = macro.code[integer][1:]
+            cps(f'Pop {name}[{integer}]: {first}')
                 
     # No output message
-    elif partial_match([MOD], tokens):
-        mod, rest = partial_extract(1, tokens)
-        if mod[0] == NULL:
-            main(argv[1:], argc - 1, False)
+    elif partial_match([NULL], tokens):
+        main(argv[1:], argc - 1, False)
 
     # Multi-line execute
     elif partial_match([NAME], tokens):
@@ -253,8 +261,8 @@ if __name__ == '__main__':
     args = argv[1:]
     argc = len(args)
     
-    if argc == 0:
-        print('CPS v2.0.3 2024')
+    if argc == 1 and args[0] in ['--repl', '-r']:
+        print(f'CPS v{VERSION} 2024')
         print('| Type "--help" to check the help message.')
         print('| "exit" to closes the interpreter.')
     

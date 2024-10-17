@@ -1,9 +1,8 @@
-# CPS v2.0.4 (Command Prompt Saver)
+# CPS v2.1 (Command Prompt Saver)
 
 ## Work in progress
 
 **TODO** list:
-- Add parameter value replacing for macros.
 - Add variable manipulation.
 
 ## Why?
@@ -23,7 +22,7 @@ Starting the line with "." makes the output messages to disable for that instruc
 `. macro = 'echo The output message must not display'`
 
 - **Console interpreter**:  
-The CPS v2.0 have a console interpreter, so you can test CPS instructions without modifying your main configuration.
+The CPS v2.1 has a console interpreter, so you can test CPS instructions without modifying your main configuration.
 
 ### Coming soon
 - **Multiple configurations**:  

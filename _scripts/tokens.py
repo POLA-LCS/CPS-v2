@@ -1,6 +1,3 @@
-# Constants
-VERSION = '2.0.1'
-
 SET = '='
 APP = '+'
 PRE = '-'
@@ -29,12 +26,10 @@ COMMANDS = [
 
 NULL = '.'
 EXTRA  = '!'
-MODIFIERS = [
-    NULL,
-    EXTRA
-]
-
-Number = int | float
+# MODIFIERS = [
+#     NULL,
+#     EXTRA
+# ]
 
 # Assistants
 def is_float(number: str) -> bool:
@@ -53,17 +48,13 @@ def is_int(number: str) -> bool:
         return True
     except ValueError:
         return False
-    
-def check_range(number: Number, from_val: Number, to_val: Number):
-    assert from_val <= number <= to_val, f"Out of range({from_val} : {to_val}): {number}"
 
 # CPS TOKENS
 STRING = 'STRING'
 FLOAT  = 'FLOAT'
 INT    = 'INTEGER'
-NUM    = [FLOAT, INT]
+NUMBER    = [FLOAT, INT]
 OPER   = 'OPERATOR'
-MOD    = 'MODIFIER'
 NAME   = 'NAME'
 COMM   = 'COMMAND'
 
@@ -85,6 +76,11 @@ class Token:
         if isinstance(other, list):
             return self.type in other
         return False
+    
+    def __contains__(self, other):
+        print('THEREREERER', other)
+        if isinstance(other, list):
+            return self.type in other
 
 # Returns the number of chunks consumed and the string result
 def lex_string(argv: list[str]) -> tuple[int, str]:
@@ -103,8 +99,10 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
         arg = argv[i]
         if arg in COMMANDS:
             tokens.append(Token(COMM, arg))
-        elif arg in MODIFIERS:
-            tokens.append(Token(MOD, arg))
+        elif arg == NULL:
+            tokens.append(Token(NULL, NULL))
+        elif arg == EXTRA:
+            tokens.append(Token(EXTRA, EXTRA))
         elif arg in OPERATORS:
             tokens.append(Token(OPER, arg))
         elif arg.startswith('\''):
