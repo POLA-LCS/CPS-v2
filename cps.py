@@ -72,11 +72,11 @@ def main(argv: list[str], argc: int, printable = True):
         
     # Index assistant
     def assert_index(name: str, index: str) -> tuple[Macro, int]:
-        index = int(index)
+        int_idx = int(index)
         macro = macros.check(name)
         macro_len = macros.check_len(macro, False)
-        assert 0 >= index < macro_len, f'Out of range {name}(0, {macro_len}): {index}.'
-        return macro, index
+        assert (int_idx >= 0 and int_idx < macro_len), f'Out of range {name}(0, {macro_len}): {int_idx}.'
+        return macro, int_idx
         
     # Run default macro
     if argc == 0:
@@ -91,6 +91,7 @@ def main(argv: list[str], argc: int, printable = True):
         elif comm in [INFO_FULL, INFO_INIT]:
             for mac in macros.list_of:
                 display_info(mac)
+                print()
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
                 
