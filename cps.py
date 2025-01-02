@@ -47,8 +47,8 @@ Delete:
 
 Call:
     Mac                 Call Mac with default arguments
-    Mac ! args          Call Mac with the specified arguments
-    Mac ! Name Value    Set the Mac parameter Name to Value
+    Mac ! Args          Call Mac with the specified arguments
+    Mac !! Name Value    Set the Mac parameter Name to Value
 """)
 
 def update_cps():
