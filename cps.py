@@ -13,7 +13,7 @@ def display_help():
 
 Commands:
     --help     | -h    Display this message
-    --setup            Get started (restarts the macros.json file)
+    --restart          Restarts the macros.json file
     --info     | -i    Display the macros dictionary info
     --version  | -v    Display the version
     --repl     | -r    Open the Read-Eval-Print-Loop
@@ -99,7 +99,7 @@ def main(argv: list[str], argc: int, printable = True):
                 print()
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2024: {VERSION}')
-        elif comm == SETUP_FULL:
+        elif comm == RESTART_FULL:
             cps('Restarting macros.json file...')
             if input('    Are you sure? (Y / ...) >> ').upper() == 'Y':
                 create_json_file(MACROS_JSON, DATA_PATH)

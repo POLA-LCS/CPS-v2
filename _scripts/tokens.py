@@ -15,7 +15,7 @@ HELP_FULL    = '--help'
 HELP_INIT    = '-h'
 VERSION_FULL = '--version'
 VERSION_INIT = '-v'
-SETUP_FULL   = '--setup'
+RESTART_FULL   = '--restart'
 UPDATE_FULL  = '--update'
 COMMANDS = [
     INFO_FULL,
@@ -24,7 +24,7 @@ COMMANDS = [
     HELP_INIT,
     VERSION_FULL,
     VERSION_INIT,
-    SETUP_FULL,
+    RESTART_FULL,
     UPDATE_FULL,
 ]
 
