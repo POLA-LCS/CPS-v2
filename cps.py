@@ -1,4 +1,6 @@
 from _scripts import *
+import subprocess
+import os
 
 # Run:
 #     <nothing>     Run default macro with default arguments
@@ -50,8 +52,9 @@ Call:
 """)
 
 def update_cps():
-    import os
-    return os.system('git pull')
+    script_path = os.path.dirname(os.path.abspath(__file__))
+    process = subprocess.Popen(['git pull'], cwd=script_path)
+    return process.wait()
 
 def cps(message: str, printable = True):
     if printable:
@@ -110,8 +113,8 @@ def main(argv: list[str], argc: int, printable = True):
         elif comm == UPDATE_FULL:
             cps('Updating to the last version of CPS...')
             if input('    Are you sure? (Y / ...) >> ').upper() == 'Y':
-                if(update_cps()):
-                    cps('Updated to the last version of CPS.')
+                if(not update_cps()):
+                    cps('    Updated to the last version of CPS.')
                 return
             cps('Cancelled.')
 
