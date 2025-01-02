@@ -200,37 +200,36 @@ def main(argv: list[str], argc: int, printable = True):
 
     # DUMP, EXTEND MACRO, PREXTEND MACRO, SWAP
     elif [NAME, OPER, NAME] == tokens:
-        target_name, oper, from_name = extract_values(tokens)
-        target = macros.check(from_name) # assert
+        left, oper, right = extract_values(tokens)
+        right_macro = macros.check(right) # assert
 
         if oper == SET:
-            if (macro := macros.check(target_name, False)) is None:
-                macros.add(target_name, target.parameters, target.code)
-                cps(f'Created: {target_name} <= {from_name}', printable)
+            if (left_macro := macros.check(left, False)) is None:
+                macros.add(left, right_macro.parameters, right_macro.code)
+                cps(f'Created: {left} <= {right}', printable)
             else:
-                macro.parameters = target.parameters
-                macro.code = target.code
-                cps(f'Override: {target_name} <= {from_name}', printable)
+                left_macro.parameters = right_macro.parameters
+                left_macro.code = right_macro.code
+                cps(f'Override: {left} <= {right}', printable)
 
         elif oper == APP:
-            macro = macros.check(target_name) # assert
-            macro.code.extend(target.code)
-            cps(f'Extend: {target_name} << {from_name}', printable)
+            left_macro = macros.check(left) # assert
+            left_macro.code.extend(right_macro.code)
+            cps(f'Extend: {left} << {right}', printable)
 
         elif oper == PRE:
-            macro = macros.check(target_name) # assert
-            for i, line in enumerate(target.code):
-                macro.code.insert(i, line)
-            cps(f'Prextend: {from_name} >> {target_name}', printable)
+            left_macro = macros.check(left) # assert
+            for i, line in enumerate(right_macro.code):
+                left_macro.code.insert(i, line)
+            cps(f'Prextend: {right} >> {left}', printable)
 
         elif oper == SWP:
-            macro = macros.check(target_name) # assert
-            macros.list_of.remove(target)
-            macros.list_of.remove(macro)
-            macros.add(from_name, target.parameters, target.code)
-            macros.add(target_name, macro.parameters, macro.code)
-            cps(f'Swap: {target_name} <=> {from_name}', printable)
-        macros.changed = True
+            left_macro = macros.check(left) # assert
+            macros.remove(right)
+            macros.remove(left)
+            macros.add(right, left_macro.parameters, left_macro.code)
+            macros.add(left, right_macro.parameters, right_macro.code)
+            cps(f'Swap: {left} <=> {right}', printable)
 
     # DELETE, POP FIRST, POP LAST
     elif [NAME, OPER, NULL] == tokens:

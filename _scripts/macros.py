@@ -29,6 +29,14 @@ class MacroList:
     def add(cls, name: str, parameters: Param, code: Code):
         cls.list_of.append(Macro(name, parameters, code))
         cls.changed = True
+        
+    def remove(cls, name: str):
+        for i, macro in enumerate(cls.list_of):
+            if macro.name == name:
+                cls.list_of.pop(i)
+                cls.changed = True
+                return True
+        return False
 
     def check(cls, name: str, error = True):
         for macro in cls.list_of:
