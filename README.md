@@ -14,7 +14,7 @@ The CPS v2 has a **Read-Eval-Print-Loop**, so you can setup your **CPS** easily.
 Try it by typing `cps.py --repl`
 
 - **Indexation:**  
-`cps macro 0 = 'echo Hello'` set the first instruction of `macro` (if exists) to `echo Hello`.
+`cps macro 0 = 'echo Hello'` set the first instruction of `macro` (if exists) to `echo Hello`.  
 `cps macro 0 + ', World!'` appends `, World!` to the first instruction of `macro`.
 
 - **Disable output messages**:  

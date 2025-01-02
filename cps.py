@@ -48,7 +48,8 @@ Delete:
 Call:
     Mac                 Call Mac with default arguments
     Mac ! Args          Call Mac with the specified arguments
-    Mac !! Name Value    Set the Mac parameter Name to Value
+    Mac !! Name Value   Set the Mac parameter Name to Value
+    Mac !! Name .       Delete the Mac parameter Name
 """)
 
 def update_cps():
@@ -169,9 +170,7 @@ def main(argv: list[str], argc: int, printable = True):
         matches, rest = partial_extract(2, tokens)
         name, _ = matches
         macro = macros.check(name)
-        run_macro(
-            replace_arguments(macro, extract_values(rest))
-        )
+        run_macro(replace_arguments(macro, extract_values(rest)))
 
     # CREATE, OVERRIDE, APPEND, PREPPEND
     elif [NAME, OPER, STRING] == tokens:
