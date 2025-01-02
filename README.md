@@ -1,4 +1,4 @@
-# CPS v2.2 (Command Prompt Saver)
+# CPS v2.2.1 (Command Prompt Saver)
 
 ## Coming soon
 - Variable manipulation.
