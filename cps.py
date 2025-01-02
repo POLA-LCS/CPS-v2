@@ -126,7 +126,6 @@ def main(argv: list[str], argc: int, printable = True):
                 cps('Failed to update to the last version of CPS:\n    Git is not installed?\n    ".git" folder was deleted?\n    Are you offline?.')
                 return
             
-            cps('Updated to the last version of CPS.')
             default_format = DEFAULT_MACRO.get_dict_format()
             if (default_macro := macros.check('0', False)) is None:
                 macros.add(default_format[0], *default_format[1:])
@@ -225,6 +224,9 @@ def main(argv: list[str], argc: int, printable = True):
 
         elif oper == SWP:
             left_macro = macros.check(left) # assert
+            if left_macro == right_macro:
+                cps(f'Invalid operation: SWAP with the same macro', printable)
+                return
             macros.remove(right)
             macros.remove(left)
             macros.add(right, left_macro.parameters, left_macro.code)
