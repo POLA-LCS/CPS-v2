@@ -31,11 +31,14 @@ COMMANDS = [
 NULL = '.'
 EXCLA  = '!'
 COMMA = ','
+PARAM_PREFIX = EXCLA + EXCLA
 # MODIFIERS = [
 #     NULL,
 #     EXCLA,
-#     COMMA
+#     COMMA,
+#     PARAM_PREFIX
 # ]
+
 
 # Assistants
 def is_float(number: str) -> bool:
@@ -110,6 +113,8 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
             tokens.append(Token(EXCLA, EXCLA))
         elif arg == COMMA:
             tokens.append(Token(COMMA, COMMA))
+        elif arg == PARAM_PREFIX:
+            tokens.append(Token(PARAM_PREFIX, PARAM_PREFIX))
         elif arg in OPERATORS:
             tokens.append(Token(OPER, arg))
         elif arg.startswith('\''):

@@ -1,4 +1,4 @@
-VERSION = '2.1.2'
+VERSION = '2.2'
 
 Param = dict[str, str]
 Code = list[str]

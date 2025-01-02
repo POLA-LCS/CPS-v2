@@ -130,7 +130,7 @@ def main(argv: list[str], argc: int, printable = True):
             display_info(macros.check(name)) # assert
 
     # MODIFY PARAMETERS
-    elif [NAME, EXCLA, NAME, [STRING, INT, FLOAT]] == tokens:
+    elif [NAME, PARAM_PREFIX, NAME, [STRING, INT, FLOAT]] == tokens:
         name, _, param_name, param_value = extract_values(tokens)
         macro = macros.check(name)
         if param_name in macro.parameters:
@@ -141,7 +141,7 @@ def main(argv: list[str], argc: int, printable = True):
         macros.changed = True
 
     # DELETE PARAMETERS
-    elif [NAME, EXCLA, NAME, NULL] == tokens:
+    elif [NAME, PARAM_PREFIX, NAME, NULL] == tokens:
         name, _, param_name, _ = extract_values(tokens)
         macro = macros.check(name)
         assert param_name in macro.parameters, f"{name}'s parameter {param_name} doesn't exists."

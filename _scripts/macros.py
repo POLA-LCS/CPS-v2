@@ -1,6 +1,6 @@
 from os import system
 from .constants import *
-from .tokens import NULL, EXCLA
+from .tokens import NULL, PARAM_PREFIX
 
 class Macro:
     def __init__(self, name: str, parameters: Param, code: Code):
@@ -51,9 +51,7 @@ def display_info(macro: Macro):
 def run_macro(code: Code):
     for line in code:
         system(line)
-        
-PARAM_PREFIX = EXCLA + EXCLA
-        
+                
 def default_arguments(code: Code, parameters: Param):
     if len(parameters) == 0:
         return code
