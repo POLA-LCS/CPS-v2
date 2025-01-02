@@ -12,11 +12,12 @@ def display_help():
     print("""[USAGE]
 
 Commands:
-    --setup            Get started (restarts the macros.json file)
     --help     | -h    Display this message
+    --setup            Get started (restarts the macros.json file)
     --info     | -i    Display the macros dictionary info
     --version  | -v    Display the version
     --repl     | -r    Open the Read-Eval-Print-Loop
+    --update           Upload to the last version of CPS without losing macros
     Mac --info | -i    Display the macro Mac info
 
 Set:
@@ -47,6 +48,10 @@ Call:
     Mac ! args          Call Mac with the specified arguments
     Mac ! Name Value    Set the Mac parameter Name to Value
 """)
+
+def update_cps():
+    import os
+    return os.system('git pull')
 
 def cps(message: str, printable = True):
     if printable:
@@ -100,6 +105,13 @@ def main(argv: list[str], argc: int, printable = True):
                 create_json_file(MACROS_JSON, DATA_PATH)
                 dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
                 cps('Restarted macros.json file.')
+                return
+            cps('Cancelled.')
+        elif comm == UPDATE_FULL:
+            cps('Updating to the last version of CPS...')
+            if input('    Are you sure? (Y / ...) >> ').upper() == 'Y':
+                if(update_cps()):
+                    cps('Updated to the last version of CPS.')
                 return
             cps('Cancelled.')
 

@@ -9,14 +9,14 @@ OPERATORS = [
     SWP
 ]
 
-SETUP_FULL   = '--setup'
-UPDATE_FULL  = '--update'
 INFO_FULL    = '--info'
 INFO_INIT    = '-i'
 HELP_FULL    = '--help'
 HELP_INIT    = '-h'
 VERSION_FULL = '--version'
 VERSION_INIT = '-v'
+SETUP_FULL   = '--setup'
+UPDATE_FULL  = '--update'
 COMMANDS = [
     INFO_FULL,
     INFO_INIT,
@@ -25,7 +25,7 @@ COMMANDS = [
     VERSION_FULL,
     VERSION_INIT,
     SETUP_FULL,
-    UPDATE_FULL
+    UPDATE_FULL,
 ]
 
 NULL = '.'
@@ -33,7 +33,8 @@ EXCLA  = '!'
 COMMA = ','
 # MODIFIERS = [
 #     NULL,
-#     EXCLA
+#     EXCLA,
+#     COMMA
 # ]
 
 # Assistants
