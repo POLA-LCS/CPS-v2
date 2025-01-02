@@ -11,6 +11,7 @@ from _scripts import *
 def display_help():
     print("""[USAGE]
 Info:
+    --setup            Get started
     (--help | -h)      Display this message
     (--info | -i)      Display the macros dictionary info
     (--version | -v)   Display the version 
@@ -42,7 +43,7 @@ Delete:
     
 Call:
     Mac ! <args>    Call Mac with the specified arguments
-    Note: NULL uses the default value of the parameter.
+    Note: NULL ('.') uses the default value of the parameter.
 
     Mac ! Name Value    Set the Mac parameter Name to Value
     Mac ! Name NULL     Delete the Mac parameter Name
@@ -54,17 +55,15 @@ def cps(message: str, printable = True):
 
 def main(argv: list[str], argc: int, printable = True):
     try:
-        macro_dict = load_json_file(get_path(DATA_PATH, MACROS_JSON))
-        
+        macro_dict = load_json_file(DATA_PATH/MACROS_JSON)
     except FileNotFoundError:
         cps('It seems the macros.json file path doesn\'t exists')
         if input('    Create? (Y / ...) >> ').upper() == 'Y':
             create_json_file(MACROS_JSON, DATA_PATH)
-            dump_json_file(get_path(DATA_PATH, MACROS_JSON), {}, DEFAULT_MACRO.get_dict_format())
+            dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
             return main(argv, argc, printable)
-
     except json.decoder.JSONDecodeError:
-        dump_json_file(get_path(DATA_PATH, MACROS_JSON), {}, DEFAULT_MACRO.get_dict_format())
+        dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
         return main(argv, argc, printable)
     
     tokens = tokenize_argv(argv)
@@ -262,7 +261,7 @@ def main(argv: list[str], argc: int, printable = True):
         assert 0, f'Invalid instruction sequence: {tokens}.'
     try:
         dump_json_file(
-            get_path(DATA_PATH, MACROS_JSON),
+            DATA_PATH/MACROS_JSON,
             dict([macro.get_dict_format() for macro in macros.list_of]),
             DEFAULT_MACRO.get_dict_format()
         )
