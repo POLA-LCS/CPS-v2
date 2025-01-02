@@ -53,7 +53,10 @@ Call:
 
 def update_cps():
     script_path = os.path.dirname(os.path.abspath(__file__))
-    process = subprocess.Popen(['git pull'], cwd=script_path)
+    if not os.path.exists(script_path + '/.git'):
+        return 1
+    
+    process = subprocess.Popen('git pull', cwd=script_path, shell=True)
     return process.wait()
 
 def cps(message: str, printable = True):
@@ -96,27 +99,40 @@ def main(argv: list[str], argc: int, printable = True):
         comm = tokens[0].value
         if comm in [HELP_FULL, HELP_INIT]:
             display_help()
+            
         elif comm in [INFO_FULL, INFO_INIT]:
             for mac in macros.list_of:
                 display_info(mac)
                 print()
+                
         elif comm in [VERSION_FULL, VERSION_INIT]:
             cps(f'Version 2025: {VERSION}')
+            
         elif comm == RESTART_FULL:
             cps('Restarting macros.json file...')
-            if input('    Are you sure? (Y / ...) >> ').upper() == 'Y':
-                create_json_file(MACROS_JSON, DATA_PATH)
-                dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
-                cps('Restarted macros.json file.')
+            if 'Y' != input('    Are you sure? (Y / ...) >> ').upper():
+                cps('Cancelled.')
                 return
-            cps('Cancelled.')
+            create_json_file(MACROS_JSON, DATA_PATH)
+            dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
+            cps('Restarted macros.json file.')
+            
         elif comm == UPDATE_FULL:
             cps('Updating to the last version of CPS...')
-            if input('    Are you sure? (Y / ...) >> ').upper() == 'Y':
-                if(not update_cps()):
-                    cps('    Updated to the last version of CPS.')
+            if 'Y' != input('    Are you sure? (Y / ...) >> ').upper():
+                cps('Cancelled.')
                 return
-            cps('Cancelled.')
+            if update_cps():
+                cps('Failed to update to the last version of CPS:\n    Git is not installed?\n    ".git" folder was deleted?\n    Are you offline?.')
+                return
+            
+            cps('Updated to the last version of CPS.')
+            default_format = DEFAULT_MACRO.get_dict_format()
+            if (default_macro := macros.check('0', False)) is None:
+                macros.add(default_format[0], *default_format[1:])
+            else:
+                default_macro = DEFAULT_MACRO
+            macros.changed = True
 
     # CALL WITH DEFAULT ARGUMENTS
     elif [NAME] == tokens:
@@ -209,7 +225,10 @@ def main(argv: list[str], argc: int, printable = True):
 
         elif oper == SWP:
             macro = macros.check(target_name) # assert
-            macro, target = target, macro
+            macros.list_of.remove(target)
+            macros.list_of.remove(macro)
+            macros.add(from_name, target.parameters, target.code)
+            macros.add(target_name, macro.parameters, macro.code)
             cps(f'Swap: {target_name} <=> {from_name}', printable)
         macros.changed = True
 
