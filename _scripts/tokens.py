@@ -29,10 +29,11 @@ COMMANDS = [
 ]
 
 NULL = '.'
-EXTRA  = '!'
+EXCLA  = '!'
+COMMA = ','
 # MODIFIERS = [
 #     NULL,
-#     EXTRA
+#     EXCLA
 # ]
 
 # Assistants
@@ -82,7 +83,6 @@ class Token:
         return False
     
     def __contains__(self, other):
-        print('THEREREERER', other)
         if isinstance(other, list):
             return self.type in other
 
@@ -105,8 +105,10 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
             tokens.append(Token(COMM, arg))
         elif arg == NULL:
             tokens.append(Token(NULL, NULL))
-        elif arg == EXTRA:
-            tokens.append(Token(EXTRA, EXTRA))
+        elif arg == EXCLA:
+            tokens.append(Token(EXCLA, EXCLA))
+        elif arg == COMMA:
+            tokens.append(Token(COMMA, COMMA))
         elif arg in OPERATORS:
             tokens.append(Token(OPER, arg))
         elif arg.startswith('\''):

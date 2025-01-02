@@ -1,6 +1,6 @@
 from os import system
 from .constants import *
-from .tokens import NULL, EXTRA
+from .tokens import NULL, EXCLA
 
 class Macro:
     def __init__(self, name: str, parameters: Param, code: Code):
@@ -17,6 +17,7 @@ class Macro:
 # MAIN MACRO LIST
 class MacroList:
     _instance = None
+    changed = False
     list_of: list[Macro] = []
 
     def __new__(cls, macro_list: list[Macro]):
@@ -27,6 +28,7 @@ class MacroList:
 
     def add(cls, name: str, parameters: Param, code: Code):
         cls.list_of.append(Macro(name, parameters, code))
+        cls.changed = True
 
     def check(cls, name: str, error = True):
         for macro in cls.list_of:
@@ -50,7 +52,7 @@ def run_macro(code: Code):
     for line in code:
         system(line)
         
-PARAM_PREFIX = EXTRA + EXTRA
+PARAM_PREFIX = EXCLA + EXCLA
         
 def default_arguments(code: Code, parameters: Param):
     if len(parameters) == 0:

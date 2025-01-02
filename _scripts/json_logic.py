@@ -21,7 +21,6 @@ DEFAULT_MACRO: Macro = Macro(
 
 def create_json_file(path: str, folder_path: Path | None = None):
     full_path = (folder_path/path) if folder_path else Path(path)
-    print(f'[DEBUG] Creating json: {full_path}...')
 
     if folder_path and not folder_path.exists():
         folder_path.mkdir(parents=True)
