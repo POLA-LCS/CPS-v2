@@ -50,6 +50,7 @@ Call:
     Mac ! Args          Call Mac with the specified arguments
     Mac !! Name Value   Set the Mac parameter Name to Value
     Mac !! Name .       Delete the Mac parameter Name
+    Mac , Ins1, Ins2    Execute multiple instructions
 """)
 
 def update_cps():
@@ -60,21 +61,28 @@ def update_cps():
     process = subprocess.Popen('git pull', cwd=script_path, shell=True)
     return process.wait()
 
-def cps(message: str, printable = True):
+def cps(message: str, printable: bool):
     if printable:
         print(f'[CPS] {message}')
+        
+def cps_input(message: str, printable = True) -> str:
+    if printable:
+        print(f'[CPS] {message}', end=' ')
+        return input('>> ')
+    return ''
+
 
 def main(argv: list[str], argc: int, printable = True):
     try:
         macro_dict = load_json_file(DATA_PATH/MACROS_JSON)
     except FileNotFoundError:
-        cps('It seems the macros.json file path doesn\'t exists')
-        if input('    Create? (Y / ...) >> ').upper() == 'Y':
-            create_json_file(MACROS_JSON, DATA_PATH)
-            dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
-            return main(argv, argc, printable)
-        cps('Cancelled.')
-        return None
+        cps('It seems the macros.json file path doesn\'t exists', True)
+        if cps_input('Create? (Y / ...)', True).upper() != 'Y':
+            cps('Cancelled.', True)
+            return
+        create_json_file(MACROS_JSON, DATA_PATH)
+        dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
+        return main(argv, argc, printable)
     except json.decoder.JSONDecodeError:
         dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
         return main(argv, argc, printable)
@@ -110,21 +118,21 @@ def main(argv: list[str], argc: int, printable = True):
             cps(f'Version 2025: {VERSION}')
             
         elif comm == RESTART_FULL:
-            cps('Restarting macros.json file...')
-            if 'Y' != input('    Are you sure? (Y / ...) >> ').upper():
-                cps('Cancelled.')
+            cps('Restarting macros.json file...', printable)
+            if 'Y' != cps_input('Are you sure? (Y / ...)', printable).upper():
+                cps('Cancelled.', printable)
                 return
             create_json_file(MACROS_JSON, DATA_PATH)
             dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
-            cps('Restarted macros.json file.')
+            cps('Restarted macros.json file.', printable)
             
         elif comm == UPDATE_FULL:
             cps('Updating to the last version of CPS...')
-            if 'Y' != input('    Are you sure? (Y / ...) >> ').upper():
-                cps('Cancelled.')
+            if cps_input('Are you sure? (Y / ...)', printable).upper() != 'Y':
+                cps('Cancelled.', printable)
                 return
             if update_cps():
-                cps('Failed to update to the last version of CPS:\n    Git is not installed?\n    ".git" folder was deleted?\n    Are you offline?.')
+                cps('Failed to update to the last version of CPS:\n    Git is not installed?\n    ".git" folder was deleted?\n    Are you offline?.', printable)
                 return
             
             default_format = DEFAULT_MACRO.get_dict_format()
@@ -150,9 +158,9 @@ def main(argv: list[str], argc: int, printable = True):
         name, _, param_name, param_value = extract_values(tokens)
         macro = macros.check(name)
         if param_name in macro.parameters:
-            cps(f'Override {name} argument {param_name}: {param_value}')
+            cps(f'Override {name} argument {param_name}: {param_value}', printable)
         else:
-            cps(f'Created {param_name} for {name}: {param_value}')
+            cps(f'Created {param_name} for {name}: {param_value}', printable)
         macro.parameters[param_name] = param_value
         macros.changed = True
 
@@ -181,7 +189,7 @@ def main(argv: list[str], argc: int, printable = True):
             if macro is None: # check
                 macros.add(name, {}, [] if string == '' else [string])
                 cps(f'Create: {name}', printable)
-            elif not printable or input('[CPS] Override existing macro? (Y / ...) >> ') == 'Y':
+            elif not printable or cps_input('Override existing macro? (Y / ...)', printable) == 'Y':
                 macro.code = [] if string == '' else [string]
                 cps(f'Override: {name}', printable)
 
@@ -271,7 +279,7 @@ def main(argv: list[str], argc: int, printable = True):
 
         if oper == SET:
             macro.code[integer] = str_mod
-            cps(f'Override {name}[{integer}]: {str_mod}')
+            cps(f'Override {name}[{integer}]: {str_mod}', printable)
 
         elif oper == APP:
             macro.code[integer] += str_mod
@@ -315,7 +323,25 @@ def main(argv: list[str], argc: int, printable = True):
     # No output message
     elif partial_match([NULL], tokens):
         main(argv[1:], argc - 1, False)
+        
+    elif partial_match([NAME, NULL], tokens):
+        main([argv[0]] + argv[2:], argc - 1, False)
 
+    # Multi line operations
+    elif partial_match([NAME, COMMA], tokens):
+        match, rest = partial_extract(2, tokens)
+        name, comm = match
+        instructions: list[list[str]] = []
+        row: list[str] = []
+        for token in rest:
+            if token == COMMA:
+                instructions.append(row)
+                row = []
+            else:
+                row.append(("'" + token.value + "'") if token.type == STRING else token.value)
+        instructions.append(row)
+        for ins in instructions:
+            main([name] + ins, len(ins) + 1, printable)
     else:
         assert 0, f'Invalid instruction sequence: {tokens}.'
 

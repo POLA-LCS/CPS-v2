@@ -5,7 +5,7 @@ import json
 from platform import system as operative_system
 
 def get_local_path():
-    return Path(__file__).resolve().parent
+    return Path(__file__).resolve().parent.parent
 
 LOCAL_PATH = get_local_path()
 DATA_PATH = LOCAL_PATH/'DATA'

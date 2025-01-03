@@ -1,4 +1,4 @@
-# CPS v2.2.3 (Command Prompt Saver)
+# CPS v2.3 (Command Prompt Saver)
 
 ## Coming soon
 - Variable manipulation.
@@ -33,3 +33,10 @@ Now let's make it useful.
 `cps speak` runs and displays this message `Pola is speaking...` due to the default value of `name` parameter.  
 `cps speak ! Jonh` displays `Jonh is speaking...`.  
 extra arguments as in `cps speak ! Jonh Maria Dave` do not causes a problem.  
+
+- **Multi-line operations**:
+If you want to do multiple operations on a single macro you can try using the multi-line "operator".  
+Using a comma after a macro name and before each operation runs it using the macro name as the first argument of cps.  
+example: `cps new_macro , = 'cls' , + 'echo Hello!'` this literally runs as:  
+`cps new_macro = 'cls'`  
+`cps new_macro + 'echo Hello!'`  
