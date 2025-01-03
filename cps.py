@@ -115,7 +115,7 @@ def main(argv: list[str], argc: int, printable = True):
                 print()
                 
         elif comm in [VERSION_FULL, VERSION_INIT]:
-            cps(f'Version 2025: {VERSION}')
+            cps(f'Version 2025: {VERSION}', printable)
             
         elif comm == RESTART_FULL:
             cps('Restarting macros.json file...', printable)
@@ -127,7 +127,7 @@ def main(argv: list[str], argc: int, printable = True):
             cps('Restarted macros.json file.', printable)
             
         elif comm == UPDATE_FULL:
-            cps('Updating to the last version of CPS...')
+            cps('Updating to the last version of CPS...', printable)
             if cps_input('Are you sure? (Y / ...)', printable).upper() != 'Y':
                 cps('Cancelled.', printable)
                 return
@@ -170,7 +170,7 @@ def main(argv: list[str], argc: int, printable = True):
         macro = macros.check(name)
         assert param_name in macro.parameters, f"{name}'s parameter {param_name} doesn't exists."
         macro.parameters.pop(param_name)
-        cps(f'Delete from {name}: {param_name}')
+        cps(f'Delete from {name}: {param_name}', printable)
         macros.changed = True
 
     # INPUT ARGUMENTS
@@ -302,17 +302,17 @@ def main(argv: list[str], argc: int, printable = True):
 
         if oper == SET:
             macro.code.pop(integer)
-            cps(f'Delete: {name}[{integer}]')
+            cps(f'Delete: {name}[{integer}]', printable)
 
         elif oper == APP:
             last = macro.code[integer][-1]
             macro.code[integer] = macro.code[integer][:-1]
-            cps(f'Pop {name}[{integer}]: {last}')
+            cps(f'Pop {name}[{integer}]: {last}', printable)
 
         elif oper == PRE:
             first = macro.code[integer][0]
             macro.code[integer] = macro.code[integer][1:]
-            cps(f'Pop {name}[{integer}]: {first}')
+            cps(f'Pop {name}[{integer}]: {first}', printable)
 
         elif oper == SWP:
             cps(f'Invalid operation: SWAP with NULL', printable)
