@@ -39,4 +39,4 @@ If you want to do multiple operations on a single macro you can try using the mu
 Using a comma after a macro name and before each operation runs it using the macro name as the first argument of cps.  
 example: `cps new_macro , = 'cls' , + 'echo Hello!'` this literally runs as:  
 `cps new_macro = 'cls'`  
-`cps new_macro + 'echo Hello!'`  
+`cps new_macro + 'echo Hello!'`
