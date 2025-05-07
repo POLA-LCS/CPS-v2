@@ -2,14 +2,6 @@ from _scripts import *
 import subprocess
 import os
 
-# Run:
-#     <nothing>     Run default macro with default arguments
-#     Mac             Run Mac with default arguments
-#     Mac % <p...>    Run Mac with arguments <p>
-# Arguments:
-#     Mac %% A P       Set macro Mac argument A prompt to P
-#     Mac %% A .       Deletes argument A from Mac
-
 def display_help():
     print("""[USAGE]
 
