@@ -8,7 +8,7 @@ def getLocalPath():
     return Path(__file__).resolve().parent.parent
 
 LOCAL_PATH : Path = getLocalPath()
-DATA_PATH  : Path = LOCAL_PATH/'DATA'
+DATA_PATH  : Path = LOCAL_PATH/'data'
 MACROS_JSON: Path = DATA_PATH/'macros.json'
 VARS_JSON  : Path = DATA_PATH/'vars.json'
 
