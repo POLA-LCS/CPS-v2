@@ -8,7 +8,7 @@ class Macro:
         self.parameters = parameters
         self.code = code
         
-    def get_dict_format(self):
+    def getDictFormat(self):
         return (self.name, (self.parameters, self.code))
 
     def __repr__(self):
@@ -26,41 +26,39 @@ class MacroList:
         cls.list_of = macro_list
         return cls._instance
 
-    def add(cls, name: str, parameters: Param, code: Code):
-        cls.list_of.append(Macro(name, parameters, code))
-        cls.changed = True
+    def add(self, name: str, parameters: Param, code: Code):
+        self.list_of.append(Macro(name, parameters, code))
+        self.changed = True
         
-    def remove(cls, name: str):
-        for i, macro in enumerate(cls.list_of):
+    def remove(self, name: str):
+        for i, macro in enumerate(self.list_of):
             if macro.name == name:
-                cls.list_of.pop(i)
-                cls.changed = True
+                self.list_of.pop(i)
+                self.changed = True
                 return True
         return False
 
-    def check(cls, name: str, error = True):
-        for macro in cls.list_of:
+    def check(self, name: str):
+        for macro in self.list_of:
             if macro.name == name:
                 return macro
-        assert not error, f"Macro doesn't exists: {name}"
         return None
 
-    def check_len(cls, macro: Macro, error = True):
+    def checkLen(self, macro: Macro, error = True):
         length = len(macro.code)
-        if error:
-            assert length != 0, f"Macro is empty: {macro.name}" 
+        if error: assert length != 0, f"Macro is empty: {macro.name}" 
         return length
 
-def display_info(macro: Macro):
+def displayInfo(macro: Macro):
     print(f'[CPS] {macro.name}: {macro.parameters}:')
     for line in macro.code:
         print(f'-  {line}')
 
-def run_macro(code: Code):
+def runMacro(code: Code):
     for line in code:
         system(line)
                 
-def default_arguments(code: Code, parameters: Param):
+def defaultArguments(code: Code, parameters: Param):
     if len(parameters) == 0:
         return code
     formated_code: Code = []
@@ -70,9 +68,9 @@ def default_arguments(code: Code, parameters: Param):
         formated_code.append(line)
     return formated_code
 
-def replace_arguments(macro: Macro, argv: list[str] | None = None):
+def replaceArguments(macro: Macro, argv: list[str] | None = None):
     if not argv:
-        return default_arguments(macro.code, macro.parameters)
+        return defaultArguments(macro.code, macro.parameters)
     
     if len(macro.parameters) == 0:
         return macro.code

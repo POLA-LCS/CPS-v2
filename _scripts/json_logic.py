@@ -2,12 +2,12 @@ from .macros import Macro
 from .constants import *
 from pathlib import Path
 import json
-from platform import system as operative_system
+from platform import system as getOperativeSystem
 
-def get_local_path():
+def getLocalPath():
     return Path(__file__).resolve().parent.parent
 
-LOCAL_PATH : Path = get_local_path()
+LOCAL_PATH : Path = getLocalPath()
 DATA_PATH  : Path = LOCAL_PATH/'DATA'
 MACROS_JSON: Path = DATA_PATH/'macros.json'
 VARS_JSON  : Path = DATA_PATH/'vars.json'
@@ -16,15 +16,17 @@ DEFAULT_MACRO: Macro = Macro(
     'default',
     {},
     [
-        f'{'cls' if operative_system() == 'Windows' else 'clear'}',
-        'echo Hello, CPS! v{VERSION}'
+        f'{'cls' if getOperativeSystem() == 'Windows' else 'clear'}',
+        f'echo Hello, CPS! v{VERSION} 2025'
     ]
 )
 
-def create_json_file(
+def createJSONFileInData(
     path: Path,
     folder_path: Path | None = None
 ) -> None:
+    if not DATA_PATH.exists():
+        DATA_PATH.mkdir(parents=True)
     if folder_path is not None:
         full_path = folder_path/path
         if folder_path and not folder_path.exists():
@@ -32,14 +34,14 @@ def create_json_file(
     else:
         full_path = path
 
-    with full_path.open('w') as f:
+    with open(full_path.absolute(), 'w') as f:
         json.dump({}, f, indent=JSON_INDENT)
 
-def load_json_file(path: Path) -> dict[str, tuple[Param, Code]]:
+def loadJSONFile(path: Path) -> dict[str, tuple[Param, Code]]:
     with path.open('r') as f:
         return json.load(f)
 
-def dump_json_file(
+def dumpJSONFile(
     json_path: Path,
     content: dict,
     default: tuple | None = None

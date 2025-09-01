@@ -1,8 +1,8 @@
 from pathlib import Path
 
-VERSION = '2.3'
+VERSION: str = '2.3'
 
-Param : type = dict[str, str]
-Code  : type = list[str]
+Param = dict[str, str]
+Code  = list[str]
 
 JSON_INDENT: int = 4

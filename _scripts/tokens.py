@@ -31,7 +31,7 @@ PARAM_PREFIX: str = EXCLA + EXCLA
 
 
 # Assistants
-def is_float(number: str) -> bool:
+def isFloat(number: str) -> bool:
     try:
         dots = number.count('.')
         if dots != 1:
@@ -41,7 +41,7 @@ def is_float(number: str) -> bool:
     except ValueError:
         return False
     
-def is_int(number: str) -> bool:
+def isInt(number: str) -> bool:
     try:
         int(number)
         return True
@@ -58,7 +58,7 @@ NAME  : str       = 'NAME'
 COMM  : str       = 'COMMAND'
 
 class Token:
-    def __init__(self, type: str, value: str | None = None):
+    def __init__(self, type: str, value: str):
         self.type = type
         self.value = value
         
@@ -81,16 +81,15 @@ class Token:
             return self.type in other
 
 # Returns the number of chunks consumed and the string result
-def lex_string(argv: list[str]) -> tuple[int, str]:
+def lexString(argv: list[str]) -> tuple[int, str] | tuple[None, str]:
     string = ''
     for consumed, arg in enumerate(argv):
         if arg.endswith('\''):
             return (consumed + 1, string[1:] + arg[:-1])
-        else:
-            string += arg + ' '
-    assert 0, f"End of string not founded: {string}"
+        string += arg + ' '
+    return (None, string)
 
-def tokenize_argv(argv: list[str]) -> list[Token]:
+def tokenizeArgv(argv: list[str]) -> list[Token]:
     tokens = []
     i = 0
     while i < len(argv):
@@ -111,32 +110,33 @@ def tokenize_argv(argv: list[str]) -> list[Token]:
             if arg.endswith('\''):
                 tokens.append(Token(STRING, arg[1:-1]))
             else:
-                consumed, string = lex_string(argv[i:])
+                assert (string_result := lexString(argv[i:]))[0] is not None, f"End of string not founded: {string_result[1]}"
+                consumed, string = string_result
                 i += consumed - 1
                 tokens.append(Token(STRING, string))
-        elif is_float(arg):
+        elif isFloat(arg):
             tokens.append(Token(FLOAT, arg))
-        elif is_int(arg):
+        elif isInt(arg):
             tokens.append(Token(INT, arg))
         else:
             tokens.append(Token(NAME, arg))
         i += 1
     return tokens
 
-def extract_values(tokens: list[Token]) -> list[str]:
+def extractValues(tokens: list[Token]) -> list[str]:
     return [token.value for token in tokens]
 
 # [NAME, OPER] == [NAME, OPER, STRING]
-def partial_match(match_list: list[str], tokens: list[Token]):
+def partialMatch(match_list: list[str], tokens: list[Token]):
     tokens = tokens[:len(match_list)]
     return (match_list == tokens)
 
-def partial_extract(match_len: int, tokens: list[Token]):
+def partialExtract(match_len: int, tokens: list[Token]):
     """Returns the values of the first slice and the tokens of the second\n
     lit:
     ```
-    return extract_values(
+    return extractValues(
         tokens[:match_len]
     ), tokens[match_len:]
     ```"""
-    return (extract_values(tokens[:match_len]), tokens[match_len:])
+    return (extractValues(tokens[:match_len]), tokens[match_len:])
