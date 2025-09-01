@@ -54,8 +54,7 @@ def update_cps():
     return process.wait()
 
 def cps(message: str, printable: bool):
-    if printable:
-        print(f'[CPS] {message}')
+    if printable: print(f'[CPS] {message}')
         
 def cps_input(message: str, printable = True) -> str:
     if printable:
@@ -66,17 +65,17 @@ def cps_input(message: str, printable = True) -> str:
 
 def main(argv: list[str], argc: int, printable = True):
     try:
-        macro_dict = load_json_file(DATA_PATH/MACROS_JSON)
+        macro_dict = load_json_file(MACROS_JSON)
     except FileNotFoundError:
         cps('It seems the macros.json file path doesn\'t exists', True)
         if cps_input('Create? (Y / ...)', True).upper() != 'Y':
             cps('Cancelled.', True)
             return
-        create_json_file(MACROS_JSON, DATA_PATH)
-        dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
+        create_json_file(MACROS_JSON)
+        dump_json_file(MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
         return main(argv, argc, printable)
     except json.decoder.JSONDecodeError:
-        dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
+        dump_json_file(MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
         return main(argv, argc, printable)
 
     tokens = tokenize_argv(argv)
@@ -92,7 +91,7 @@ def main(argv: list[str], argc: int, printable = True):
 
     # Run default macro
     if argc == 0:
-        default_macro = macros.check('0')
+        default_macro = macros.check('default')
         run_macro(default_arguments(default_macro.code, default_macro.parameters))
 
     # HELP, INFO, VERSION and SETUP
@@ -115,7 +114,7 @@ def main(argv: list[str], argc: int, printable = True):
                 cps('Cancelled.', printable)
                 return
             create_json_file(MACROS_JSON, DATA_PATH)
-            dump_json_file(DATA_PATH/MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
+            dump_json_file(MACROS_JSON, {}, DEFAULT_MACRO.get_dict_format())
             cps('Restarted macros.json file.', printable)
             
         elif comm == UPDATE_FULL:
@@ -340,7 +339,7 @@ def main(argv: list[str], argc: int, printable = True):
     if macros.changed:
         try:
             dump_json_file(
-                DATA_PATH/MACROS_JSON,
+                MACROS_JSON,
                 dict([macro.get_dict_format() for macro in macros.list_of]),
                 DEFAULT_MACRO.get_dict_format()
             )

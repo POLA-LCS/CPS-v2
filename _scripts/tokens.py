@@ -1,37 +1,27 @@
-SET = '='
-APP = '+'
-PRE = '-'
-SWP = '#'
-OPERATORS = [
-    SET,
-    APP,
-    PRE,
-    SWP
+OPERATORS: list[str] = [
+    SET := '=',
+    APP := '+',
+    PRE := '-',
+    SWP := '#',
 ]
 
-INFO_FULL    = '--info'
-INFO_INIT    = '-i'
-HELP_FULL    = '--help'
-HELP_INIT    = '-h'
-VERSION_FULL = '--version'
-VERSION_INIT = '-v'
-RESTART_FULL   = '--restart'
-UPDATE_FULL  = '--update'
-COMMANDS = [
-    INFO_FULL,
-    INFO_INIT,
-    HELP_FULL,
-    HELP_INIT,
-    VERSION_FULL,
-    VERSION_INIT,
-    RESTART_FULL,
-    UPDATE_FULL,
+COMMANDS: list[str] = [
+    INFO_FULL    := '--info',
+    INFO_INIT    := '-i',
+    HELP_FULL    := '--help',
+    HELP_INIT    := '-h',
+    VERSION_FULL := '--version',
+    VERSION_INIT := '-v',
+    RESTART_FULL := '--restart',
+    UPDATE_FULL  := '--update',
+    PROFILE_INIT := '-p',
+    PROFILE_FULL := '--profile',
 ]
 
-NULL = '.'
-EXCLA  = '!'
-COMMA = ','
-PARAM_PREFIX = EXCLA + EXCLA
+NULL        : str = '.'
+EXCLA       : str = '!'
+COMMA       : str = ','
+PARAM_PREFIX: str = EXCLA + EXCLA
 # MODIFIERS = [
 #     NULL,
 #     EXCLA,
@@ -59,13 +49,13 @@ def is_int(number: str) -> bool:
         return False
 
 # CPS TOKENS
-STRING = 'STRING'
-FLOAT  = 'FLOAT'
-INT    = 'INTEGER'
-NUMBER    = [FLOAT, INT]
-OPER   = 'OPERATOR'
-NAME   = 'NAME'
-COMM   = 'COMMAND'
+STRING: str       = 'STRING'
+FLOAT : str       = 'FLOAT'
+INT   : str       = 'INTEGER'
+NUMBER: list[str] = [FLOAT, INT]
+OPER  : str       = 'OPERATOR'
+NAME  : str       = 'NAME'
+COMM  : str       = 'COMMAND'
 
 class Token:
     def __init__(self, type: str, value: str | None = None):
